@@ -61,3 +61,5 @@ where point >20
 order by point desc;
 select sysdate from dual;
 
+
+drop table hm;
