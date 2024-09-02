@@ -47,7 +47,7 @@ select name, addr, point from users where point>=80 and point<90;
 /*7. 쿼리 결과 중 NULL은 실제 입력하지 않은 값입니다.
    주소를 입력하지 않은 학생의 이름과, 주소, 학년, 점수, 주민번호를 출력하세요 */
    
-select name, addr, grade, point, jumin from users where addr=null;
+select name, addr, grade, point, jumin from users where addr is null;
 
 /*8. 4학년의 점수를 10%로 올린 점수를 계산하세요.
    (단, 원본데이터는 반영되지 않는다) */
@@ -58,12 +58,12 @@ select point*1.1 from users where grade=4;
 select no, name, addr, point from users order by point;
 
 /*10. 학년을 오름차순으로 정렬하시오, 단 학년이 동일 할 경우
-포인트가 높은 사람이 먼저 출력됩니다. 출력은 번호, 이름, 학년, 포인트 */
+  포인트가 높은 사람이 먼저 출력됩니다. 출력은 번호, 이름, 학년, 포인트 */
 
 select no, name, point, grade from users order by grade, point desc;
 
 /* 11. 현재의 점수에서 -10을 보정한 결과 80점 이상인 사람의
-이름과 점수, 보정한 결과 점수를 출력하세요.? */
+   이름과 점수, 보정한 결과 점수를 출력하세요.? */
 select name, point, point-10 from users where point-10>=80;
 
 /* 12. 2학년의 모든 학생을 출력하시오 . 출력 컬럼명은
@@ -107,9 +107,8 @@ select max(point) 최고점수 from users;
 /* 23. 2학년 중 가장 낮은 점수를 획득한 점수는 몇점입니까? */
 select min(point) from users where grade=2;
 
-/* 24. 보안을 위해서 주소를 모두 출력하지 않고 앞의 세 글자만 출력하고 뒤에 *를 하나 붙힌다.
-   (단, 원본 데이터에 반영되지 않습니다.)
-   예)suwon  >> su* */
+/* 24. 보안을 위해서 주소를 모두 출력하지 않고 앞의 세 글자만 출력하고
+  뒤에 *를 하나 붙힌다. (단, 원본 데이터에 반영되지 않습니다.) 예)suwon  >> su* */
 select rpad(substr(addr,1,2),3,'*') from users;
 
 /* 25. 이름의 맨 앞에 *를 맨 뒤에도*를 붙혀서 출력한다.
@@ -119,9 +118,35 @@ select concat(concat('*',name),'*') from users;
 /* 26. 생년월일을 그대로 출력하지 말고
     xx 년 xx 월 xx 일 형식으로 출력한다.
     (단, 원본 데이터에 반영되지 않습니다. 성별은 무시한다) */
-select to_char(to_date(substr(jumin,1,6)), 'yy"년"mm"월"dd"일"') jumin from users;
+select to_char(to_date(substr(jumin,1,6)), 'yy"년"mm"월"dd"일"') jumin
+from users;
 
 /* 27. 이름, 포인트, 학년, 생년월일, 성별을 추가한다. 성별은 생년월일로 판단하며
    마지막 숫자가1이면 남, 2이면 여라고 표시한다. */
 select name, point, grade, jumin, decode(substr(jumin,8,1), 1,'남',2,'여')
 from users;
+
+/* 추가 1. 모든 사람의 이름과 주민번호를 출력하고 나이를 출력하시오. */
+select name, jumin,
+to_number(to_char(sysdate,'yyyy'))-(1900+to_number(substr(jumin,1,2))) 나이
+from users;
+
+/* 추가 2. 모든 사람의 정보를 출력하시오.
+   단 이름을 마스킹하시요.
+   마스킹 방법은 첫글자는 그대로 나머지는 *, *는 갯 수는 이름의 길이보다 하나 적다.
+   예) abcdef > a***** */
+select no, 
+rpad(substr(name,1,1),length(name),'*') name,
+addr, point, grade, jumin from users;
+
+/* 추가 3. 모든 사람의 정보를 출력하시오.
+    1학년은 이름뒤에 *, 2학년은 이름 뒤에 %, 3학년은 이름뒤에 #, 4학년은 이름뒤에 !를
+   추가하여 출력하시오. */
+
+select
+case when grade=1 then concat(name,'*')
+when grade=2 then concat(name,'%')
+when grade=3 then concat(name,'#')
+when grade=4 then concat(name,'!')
+end as 이름
+from users ;
