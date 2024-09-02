@@ -150,3 +150,6 @@ when grade=3 then concat(name,'#')
 when grade=4 then concat(name,'!')
 end as 이름
 from users ;
+
+/* 추가 4. 남자만 출력하시오 */
+select * from users where substr(jumin,8,1)=1;
