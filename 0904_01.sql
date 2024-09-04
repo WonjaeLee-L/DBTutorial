@@ -133,17 +133,63 @@ where salary >
 --order by
 
 -- !!!! 전체 평균급여보다 높은 급여를 받는 사람의 이름과, 급여, 전체평균급여를 출력하시오
+select name,
+       salary,
+       (select avg(salary) -- 스칼라 서브쿼리, 대안책은 조인
+        from muser)평균급여 -- 수식? 함수? 서브쿼리!
+from muser
+where salary >
+    (select avg(salary)
+    from muser);
+    -- 성능은 별로임.. 왜냐하면 본쿼리 select에서 튜플을
+    -- 하나씩 완성할때마다 서브쿼리를 실행하기 때문에
+    -- 동일한 서브쿼리를 계속 실행하기 때문이다.
 
-
-
--- !!!! 여직원의 평균급여보다 높은 남자직원은 모두 몇명입니까
--- !!!! grade별 평균 급여를 출력하세요..
 -- !!!! 그룹별 평균급여가 전체 평균보다 높은 그룹을 출력하시오.
-13 직원들의 월급 명세서를 출력하시오. (출력 형태는 이름, 월급(grade*salary*time)
-14 직원들의 성별을 출력하시오. (출력 형태 이름, 성별(성별은 남또는 여로 출력한다)
-15 time은 근무시간이 근무시간이 31이상인 사람의 이름을 출력하시오.
-16 짝수년도에 태어난 사람들의 이름을 모두 출력하싱.
-17 직원들의 생년월일을 출력하시오. (출력 형태는 이름과 생년월일(97년1월2일))
-18 여직원들의 육아를 지원하기 위한 정책으로 time을 2시간가산하기로 했다. 이를 처리 하시오.
-19 나이별 인원수는 몇명입니까
-20 2학년그룹과 4학년 그룹은 모두 몇명입니까
+-- 그룹별 평균을 구한다... 이 그룹중에 전체 평균보다 높은 그룹 선택
+select grade, avg(salary)
+from muser
+--where
+group by grade having avg(salary) > (
+                                    select avg(salary)
+                                    from muser);
+--order by
+
+-- !!!! 직원들의 성별을 출력하시오.
+-- (출력 형태 이름, 성별(성별은 남또는 여로 출력한다)
+select name 이름,
+       decode(substr(reg_num,8,1),'1','남','3','남','여') 성별
+from muser;
+--where
+--group by
+--order by
+-- 오라클에서 조건에 따라 처리하는 문법은 case when then else end
+-- case when then else end의 구조를 분석
+-- case
+--      when 조건1 then 조건1이 참일 경우 실행
+--      when 조건2 then 조건2가 참일 경우 실행
+--      else 조건1과 조건2 어느 것도 참이 아닌 경우 실행
+-- end
+select name 이름,
+       case
+            when substr(reg_num,8,1)in('1','3') then '남'
+            else '여'
+       end 성별
+from muser; -- 육아 문제와 연계
+
+select distinct grade, salary from muser;
+-- distinct는 중복된 컬럼을 제거하고 select절에서 한번만 사용이 가능
+-- 중복 제거 범위는 select에서 지정한 전체 행의 중복이다.
+-- #3번 문제에서 연령별(time컬럼) 급여의 합. over 함수 이용
+select distinct -- 여기서는 연령, 총합 컬럼 모두를 대상으로 중복된 것 제거
+       time 연령,
+       sum(salary) over(partition by time) 총합
+from muser;
+
+-- #2번 문제 time이 30-31, 32이상으로 나누어 살아온 월수의 합
+select 
+  (select trunc(sum(months_between(sysdate,substr(reg_num,1,6)))) 
+   from muser where time in (30,31)) as 삼공삼일,
+  (select trunc(sum(months_between(sysdate,substr(reg_num,1,6)))) 
+   from muser where time >= 32) as 삼이 
+from dual;
