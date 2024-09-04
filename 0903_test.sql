@@ -186,4 +186,10 @@ order by grade;
     to_date('문자','날짜포맷')
     
 6. if문 역할 함수
-    decode, case
+    decode : decode(컬럼,조건1,결과1,조건2,결과2)
+    case(case when then else end) :
+        case
+              when 조건1 then 조건1이 참일 경우 실행
+              when 조건2 then 조건2가 참일 경우 실행
+              else 조건1과 조건2 어느 것도 참이 아닌 경우 실행
+        end
