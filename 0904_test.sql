@@ -210,6 +210,26 @@ on u.id=c.id
 left outer join companycar cc   -- 이렇게 바로 뒤에 다른 조인을 적으면,
 on c.c_num=cc.c_num;            -- 조인을 연속으로 할 수 있다.
 
+- 12번의 서비스를 제공하기 위해 view를 만들어 봄 - 컬럼명 다 만들어야 한다
+create view all_users as (
+select u.name name, NVL(c.c_num,'없음') carnum,
+NVL(cc.c_name,'없음') carname
+from users u
+left outer join carinfo c
+on u.id=c.id
+left outer join companycar cc
+on c.c_num=cc.c_num
+);
+
+commit;
+select * from all_users;    -- view 이름으로 조회가 가능하다.
+select name, carnum, carname from all_users;
+
+-- view
+view를 통해서 insert, delete, update가 이론적으로 가능하지만,
+테이블의 무결성제약조건에 위배가 되지 않아야 한다.
+이런점에서, view는 대부분 조회 목적으로 사용한다.
+
 -- 고찰
 테이블은 데이터 중복을 최소화 하기 위해 정규화 되어야 하고,
 정규화는 테이블을 분리하는 의미가 있다.
@@ -220,4 +240,4 @@ on c.c_num=cc.c_num;            -- 조인을 연속으로 할 수 있다.
 db가 조인 연산을 계속해야 한다. 쿼리도 복잡하므로 간단하게 할 방법을 생각해본다.
 해결책은 물리적은 테이블은 유지하되, 조인 결과를 합친 논리적인 테이블을 만드는 것이다.
 논리적인 테이블은 물리적인 테이블의 데이터로 만들어져 있다.
-이런 논리적인 테이블을 뷰라고 한다.
+이런 논리적인 테이블을 view(뷰)라고 한다.
